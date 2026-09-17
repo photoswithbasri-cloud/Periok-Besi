@@ -1,0 +1,32 @@
+# Version control
+.git
+.gitignore
+
+# Datasets — not needed at runtime (uploads come from the browser at request
+# time, nothing is read from disk). data/raw/ specifically holds the large
+# (~17MB each), gitignored real Rail_Corrugation files that must never end
+# up in the Docker build context or image.
+data/
+
+# Reference docs — not needed at runtime
+docs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Node (not used yet, but keep the image clean if it ever is)
+node_modules/
+
+# Editor/OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
