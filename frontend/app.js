@@ -79,7 +79,8 @@ async function runPrediction(name) {
   formData.append("file", fileInput.files[0]);
 
   runBtn.disabled = true;
-  statusEl.textContent = "Running…";
+  statusEl.classList.add("processing");
+  statusEl.innerHTML = `<span class="spinner"></span>Processing your file… this can take up to a minute or two for larger files.`;
   resultEl.hidden = true;
 
   try {
@@ -94,9 +95,11 @@ async function runPrediction(name) {
     }
 
     state.lastResult = data;
+    statusEl.classList.remove("processing");
     statusEl.textContent = "Done.";
     renderResult(name, data);
   } catch (err) {
+    statusEl.classList.remove("processing");
     statusEl.textContent = err.message;
     statusEl.classList.add("error");
   } finally {
