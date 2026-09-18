@@ -3,20 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rail Fleet Health Monitor</title>
+  <title>Train Condition Monitoring Platform</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="app-header">
-    <h1>Rail Fleet Health Monitor</h1>
-    <p class="subtitle">NEBULA X — Problem Statement 3: Train Condition Monitoring</p>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">TCM</div>
+        <div class="brand-text">
+          <strong>Train Condition</strong>
+          <span>Monitoring Platform</span>
+        </div>
+      </div>
+      <nav id="main-nav" class="main-nav">
+        <button class="nav-item" data-view="overview">
+          <span class="nav-icon">&#9673;</span> Overview
+        </button>
+        <button class="nav-item" data-view="assessment">
+          <span class="nav-icon">&#43;</span> New Assessment
+        </button>
+        <button class="nav-item" data-view="submission">
+          <span class="nav-icon">&#8681;</span> Submission Centre
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        NEBULA X &mdash; Problem Statement 3
+      </div>
+    </aside>
 
-  <main class="app-main">
-    <nav id="tab-bar" class="tab-bar"></nav>
-    <section id="panel" class="panel"></section>
-  </main>
+    <main class="content">
+      <section id="view-overview" class="view"></section>
 
+      <section id="view-assessment" class="view" hidden>
+        <div class="view-header">
+          <h2>New Assessment</h2>
+          <p class="hint">Upload a subsystem's sensor data to run the trained model and get a health assessment.</p>
+        </div>
+        <nav id="tab-bar" class="tab-bar"></nav>
+        <section id="panel" class="panel"></section>
+      </section>
+
+      <section id="view-submission" class="view" hidden></section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
