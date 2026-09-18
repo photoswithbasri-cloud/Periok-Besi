@@ -1,5 +1,10 @@
 const GAUGE_CIRCUMFERENCE = 2 * Math.PI * 52;
 const SUBSYSTEM_ORDER = ["door", "acv", "rail_corrugation", "shm"];
+// Rail Corrugation and SHM must submit one predictions.csv covering every
+// test file, so their tab accepts a batch upload. Door (one continuous
+// stream) and ACV (a single held-out file) stay single-file. Must match
+// MULTI_FILE_SUBSYSTEMS in backend/app.py.
+const MULTI_FILE_SUBSYSTEMS = ["rail_corrugation", "shm"];
 
 const state = {
   subsystems: {},
@@ -44,13 +49,19 @@ function selectSubsystem(name) {
 function renderPanel(name) {
   const meta = state.subsystems[name];
   const panel = document.getElementById("panel");
+  const isMulti = MULTI_FILE_SUBSYSTEMS.includes(name);
 
   panel.innerHTML = `
     <div class="card">
       <h2>${meta.label}</h2>
       <p class="hint">${meta.input_hint}</p>
+      ${
+        isMulti
+          ? `<p class="hint">Select all test files at once — every file's prediction is combined into one downloadable CSV.</p>`
+          : ""
+      }
       <div class="upload-row">
-        <input type="file" id="file-input" accept="${meta.allowed_extensions.join(",")}" />
+        <input type="file" id="file-input" accept="${meta.allowed_extensions.join(",")}" ${isMulti ? "multiple" : ""} />
         <button id="run-btn">Run</button>
       </div>
       <div id="status" class="status"></div>
@@ -67,20 +78,22 @@ async function runPrediction(name) {
   const runBtn = document.getElementById("run-btn");
   const resultEl = document.getElementById("result");
 
+  const isMulti = MULTI_FILE_SUBSYSTEMS.includes(name);
   statusEl.classList.remove("error");
 
   if (!fileInput.files.length) {
-    statusEl.textContent = "Choose a file first.";
+    statusEl.textContent = isMulti ? "Choose at least one file first." : "Choose a file first.";
     statusEl.classList.add("error");
     return;
   }
 
   const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
+  Array.from(fileInput.files).forEach((f) => formData.append("file", f));
 
   runBtn.disabled = true;
   statusEl.classList.add("processing");
-  statusEl.innerHTML = `<span class="spinner"></span>Processing your file… this can take up to a minute or two for larger files.`;
+  const fileWord = fileInput.files.length > 1 ? `${fileInput.files.length} files` : "your file";
+  statusEl.innerHTML = `<span class="spinner"></span>Processing ${fileWord}… this can take up to a minute or two for larger files.`;
   resultEl.hidden = true;
 
   try {
@@ -133,6 +146,11 @@ function renderResult(name, data) {
         ${data.alert ? "⚠ Alert (score < 80)" : "✓ Normal"}
       </div>
     </div>
+    ${
+      data.file_count
+        ? `<p class="hint">Combined across ${data.file_count} files — average health score, alert if any file triggered one.</p>`
+        : ""
+    }
     ${renderTable(meta.output_columns, data.results)}
     <button id="download-btn" class="secondary" ${data.results.length ? "" : "disabled"}>
       Download CSV
@@ -150,7 +168,7 @@ function renderTable(columns, rows) {
   const body = rows
     .map((row) => `<tr>${columns.map((c) => `<td>${row[c]}</td>`).join("")}</tr>`)
     .join("");
-  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  return `<div class="table-scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
 function csvEscape(value) {
